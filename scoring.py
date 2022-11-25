@@ -23,7 +23,7 @@ def pointCalculation(data):
     point = data["point"]
     hour = int(time[2:4])
     hour /= 60
-    point = point*(1-hour/2)
+    point = int(point*(1-hour/2))
     return point
 
 def updatePoint(dataUser,userId,point):
