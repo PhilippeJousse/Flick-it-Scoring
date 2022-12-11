@@ -1,4 +1,4 @@
-import os, firebase_admin,pyrebase
+import os, json,pyrebase
 from google.cloud import pubsub_v1
 from concurrent.futures import TimeoutError
 
@@ -20,14 +20,12 @@ firebase = pyrebase.initialize_app(firebaseConfig)
 db = firebase.database()
 
 def getMetadata(id):
-    data = db.collection('metadata').document(id).get()
-    data = data.to_dict()
-    return data
+    data = db.child("metadata").child(id).get()
+    return json.loads(json.dumps(data.val()))
 
 def getUserData(userId):
-    userData = db.collection('users').document(userId).get()
-    userData = userData.to_dict()
-    return userData
+    userData = db.child('users').child(userId).get()
+    return json.loads(json.dumps(userData.val()))
 
 def pointCalculation(data):
     time = data["timeUTC"]
@@ -38,9 +36,9 @@ def pointCalculation(data):
     return point
 
 def updatePoint(dataUser,userId,point):
-    curPoint = dataUser["point"]
+    curPoint = dataUser["totalPoint"]
     newPoint = curPoint + point
-    db.collection('users').document(userId).update({"point":newPoint})
+    db.child('users').child(userId).update({"totalPoint":newPoint})
     return 0
 
 def callback(message: pubsub_v1.subscriber.message.Message) -> None:
@@ -54,6 +52,7 @@ def callback(message: pubsub_v1.subscriber.message.Message) -> None:
 
 subscriber = pubsub_v1.SubscriberClient()
 streaming_pull_future = subscriber.subscribe("projects/third-essence-365119/subscriptions/launch-scoring-sub", callback=callback)
+print(f"Listening for messages on projects/third-essence-365119/subscriptions/launch-scoring-sub...\n")
 
 # Wrap subscriber in a 'with' block to automatically call close() when done.
 with subscriber:
