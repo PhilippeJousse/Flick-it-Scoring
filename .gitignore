@@ -1,0 +1,6 @@
+
+*.pyc
+*.pyc
+google_key.json
+serviceAccountCredentials.json
+firebaseConfig.json
